@@ -1,3 +1,8 @@
+from selenium.webdriver.support import expected_conditions as EC
+
+from selenium.common import TimeoutException
+from selenium.webdriver.support.wait import WebDriverWait
+
 from .base_page import BasePage
 from .locators import ProductPageLocators
 
@@ -30,3 +35,18 @@ class ProductPage(BasePage):
     def added_to_basket_correctly(self):
         self.product_name_should_be_correct()
         self.product_price_should_be_correct()
+
+    def should_not_be_success_message(self):
+        assert not self.is_element_present(
+            *ProductPageLocators.SUCCESS_ALERT), "Success message present, when it shouldn't"
+
+    def is_disappeared(self, how, what, timeout=4):
+        try:
+            WebDriverWait(self.browser, timeout, 1, TimeoutException). \
+                until_not(EC.presence_of_element_located((how, what)))
+        except TimeoutException:
+            return False
+        return True
+
+    def alert_message_disappeared(self):
+        assert self.is_disappeared(*ProductPageLocators.SUCCESS_ALERT), "Success message did not disappear"
